@@ -4528,6 +4528,15 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
@@ -4536,12 +4545,14 @@ __webpack_require__.r(__webpack_exports__);
         id_pago_mensual: 0,
         id_gestion_curso: ''
       },
+      paralelo: '',
       nombreAlumno: '',
       codGestion: '',
       arrayGestion: [],
       arrayMensualidad: [],
       arrayAlumno: [],
       arrayGCurso: [],
+      arrayParalelo: [],
       modal: 0,
       tituloModal: '',
       tipoAccion: 0,
@@ -4635,7 +4646,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     listarAlumno: function listarAlumno(buscarA, criterioA) {
       var me = this;
-      var url = '/inscripcion/alumnoInscripcion?buscarA=' + buscarA + '&criterioA=' + criterioA + '&id_gestion_curso=' + me.datos.id_gestion_curso;
+      var url = '/inscripcion/alumnoInscripcion2?paralelo=' + me.paralelo + '&id_gestion_curso=' + me.datos.id_gestion_curso;
       axios.get(url).then(function (response) {
         me.arrayAlumno = response.data;
       })["catch"](function (error) {
@@ -4676,6 +4687,18 @@ __webpack_require__.r(__webpack_exports__);
         console.log(error);
       });
     },
+    selectParalelo: function selectParalelo() {
+      var me = this;
+      var url = '/paralelo/selectParalelo';
+      axios.get(url).then(function (response) {
+        me.arrayParalelo = response.data;
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    },
+    facturaPdf: function facturaPdf(id) {
+      window.open('http://127.0.0.1:8000/mensualidad/pago/pdf/' + id);
+    },
     selectCursoGestion: function selectCursoGestion() {
       var me = this;
       var url = '/gestion/curso/selectCursoGestion?cod_gestion=' + this.codGestion;
@@ -4688,6 +4711,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   mounted: function mounted() {
     this.selectGestion();
+    this.selectParalelo();
   }
 });
 
@@ -5045,11 +5069,18 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (result) {
         if (result.value) {
           var me = _this2;
+          var respt;
           axios.put('/gestion/activar', {
             'id': id
           }).then(function (response) {
-            me.listarGestion();
-            swal('Activado!', 'Esta Gestion Escolar se ha habilitado con éxito.', 'success');
+            respt = response.data;
+
+            if (respt == 0) {
+              swal('Ha ocurrido un error!', 'La gestion Anterior aun esta vigente.');
+            } else {
+              me.listarGestion();
+              swal('Activado!', 'Esta Gestion Escolar se ha habilitado con éxito.', 'success');
+            }
           })["catch"](function (error) {
             console.log(error);
           });
@@ -5392,6 +5423,19 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
@@ -5408,7 +5452,8 @@ __webpack_require__.r(__webpack_exports__);
       arrayMateria: [],
       errorGestionCurso: 0,
       errorMostrarMsjGestionCurso: [],
-      listado: 0
+      listado: 0,
+      validar: 0
     };
   },
   methods: {
@@ -5427,6 +5472,7 @@ __webpack_require__.r(__webpack_exports__);
       me.arrayDetalle = [];
       me.errorMostrarMsjGestionCurso = [];
       me.codGestion = '';
+      me.validar = 0;
     },
     volverListadoCero: function volverListadoCero() {
       this.listado = 0;
@@ -5439,6 +5485,7 @@ __webpack_require__.r(__webpack_exports__);
     detalleGestionCurso: function detalleGestionCurso() {
       var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
       this.listado = 2;
+      this.arrayMateria = [];
       this.codGestion = data['cod_gestion'];
       this.curso = data['curso'];
       this.listarCursoMateria(data['id']);
@@ -5448,6 +5495,19 @@ __webpack_require__.r(__webpack_exports__);
       var url = '/curso/materia/listarMateriaGestion?id_gestion_curso=' + id_gestion_curso;
       axios.get(url).then(function (response) {
         me.arrayMateria = response.data;
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    },
+    verificarInstancia: function verificarInstancia() {
+      var me = this;
+      var url = '/curso/materia/validar?id_gestion_curso=' + me.datos.id_gestion_curso;
+      axios.get(url).then(function (response) {
+        if (response.data == 1) {
+          alert("Error... Ya se encuentran Administradas! - <<Dirigase a Ver Detalles>>");
+        } else {
+          me.validar = 1;
+        }
       })["catch"](function (error) {
         console.log(error);
       });
@@ -6466,23 +6526,32 @@ __webpack_require__.r(__webpack_exports__);
     programarMensualidad: function programarMensualidad() {
       var me = this;
       axios.post('/pago/mensual/programar', this.datos).then(function (response) {
-        me.alert = 1;
-        me.datos = {
-          id: 0,
-          plazo_fecha: '',
-          mes: '',
-          monto: '',
-          id_gestion_curso: ''
-        };
+        if (response.data == 1) {
+          alert('Error!.. este Mes ya esta programado. <<Ver Mensualidades>>');
+        } else {
+          me.alert = 1;
+          me.datos = {
+            id: 0,
+            plazo_fecha: '',
+            mes: '',
+            monto: '',
+            id_gestion_curso: ''
+          };
+        }
       })["catch"](function (error) {
         console.log(error);
       });
     },
     listarMensualidad: function listarMensualidad() {
       var me = this;
+      me.arrayMensualidad = [];
       var url = '/mensualidad/detalle?id_gestion_curso=' + me.datos.id_gestion_curso + '&mes=' + me.datos.mes;
       axios.get(url).then(function (response) {
         me.arrayMensualidad = response.data;
+
+        if (me.arrayMensualidad.length == 0) {
+          alert('Error!.. Este mes no esta programado. <<Volver>>');
+        }
       })["catch"](function (error) {
         console.log(error);
       });
@@ -70872,7 +70941,7 @@ var render = function() {
                     _vm._v(" "),
                     _c("div", { staticClass: "col-md-4" }, [
                       _c("div", { staticClass: "form-group" }, [
-                        _c("label", [_vm._v("Alumno")]),
+                        _c("label", [_vm._v("Alumno *(Matricula)")]),
                         _vm._v(" "),
                         _c("input", {
                           directives: [
@@ -72402,6 +72471,60 @@ var render = function() {
                       ])
                     ]),
                     _vm._v(" "),
+                    _c("div", { staticClass: "col-md-4" }, [
+                      _c("div", { staticClass: "form-group" }, [
+                        _c("label", [_vm._v("Paralelo")]),
+                        _vm._v(" "),
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.paralelo,
+                                expression: "paralelo"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.paralelo = $event.target.multiple
+                                  ? $$selectedVal
+                                  : $$selectedVal[0]
+                              }
+                            }
+                          },
+                          [
+                            _c(
+                              "option",
+                              { attrs: { value: "", disabled: "" } },
+                              [_vm._v("Seleccione")]
+                            ),
+                            _vm._v(" "),
+                            _vm._l(_vm.arrayParalelo, function(paralelo) {
+                              return _c("option", {
+                                key: paralelo.id,
+                                domProps: {
+                                  value: paralelo.nombre,
+                                  textContent: _vm._s(paralelo.nombre)
+                                }
+                              })
+                            })
+                          ],
+                          2
+                        )
+                      ])
+                    ]),
+                    _vm._v(" "),
                     _c("div", { staticClass: "col-md-8" }, [
                       _vm._m(0),
                       _vm._v(" "),
@@ -72553,8 +72676,7 @@ var render = function() {
                                       on: {
                                         click: function($event) {
                                           return _vm.facturaPdf(
-                                            mensualidad.id_inscripcion,
-                                            mensualidad.id_pago_mensual
+                                            mensualidad.id_inscripcion
                                           )
                                         }
                                       }
@@ -73080,7 +73202,7 @@ var render = function() {
                 _c("div", { staticClass: "card-body" }, [
                   _c("div", { staticClass: "form-group row border" }, [
                     _c("div", { staticClass: "col-md-4" }, [
-                      _c("label", [_vm._v("Gestion Academica")]),
+                      _c("label", [_vm._v("Gestion Academica(Ejem: 2022)")]),
                       _vm._v(" "),
                       _c("div", { staticClass: "form-group" }, [
                         _c("input", {
@@ -73880,23 +74002,52 @@ var render = function() {
                           "button",
                           {
                             staticClass: "btn btn-primary",
-                            attrs: {
-                              type: "submit",
-                              "data-toggle": "modal",
-                              "data-target": "#modalMateria"
-                            },
+                            attrs: { type: "submit" },
                             on: {
                               click: function($event) {
-                                return _vm.listarMateria()
+                                return _vm.verificarInstancia()
                               }
                             }
                           },
-                          [
-                            _c("i", { staticClass: "fa fa-search" }),
-                            _vm._v(" Seleccione")
-                          ]
+                          [_vm._v("Verificar")]
                         )
                       ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-4" }, [
+                      _vm._m(1),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        { staticClass: "form-group" },
+                        [
+                          _vm.validar == 0
+                            ? [_vm._m(2)]
+                            : [
+                                _c(
+                                  "button",
+                                  {
+                                    staticClass: "btn btn-primary",
+                                    attrs: {
+                                      type: "submit",
+                                      "data-toggle": "modal",
+                                      "data-target": "#modalMateria"
+                                    },
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.listarMateria()
+                                      }
+                                    }
+                                  },
+                                  [
+                                    _c("i", { staticClass: "fa fa-search" }),
+                                    _vm._v(" Seleccione")
+                                  ]
+                                )
+                              ]
+                        ],
+                        2
+                      )
                     ]),
                     _vm._v(" "),
                     _c("div", { staticClass: "col-md-12" }, [
@@ -73935,7 +74086,7 @@ var render = function() {
                   _c("div", { staticClass: "form-group row border" }, [
                     _c("div", { staticClass: "table-responsive" }, [
                       _c("table", { staticClass: "table tablesorter" }, [
-                        _vm._m(1),
+                        _vm._m(3),
                         _vm._v(" "),
                         _vm.arrayDetalle.length
                           ? _c(
@@ -73981,7 +74132,7 @@ var render = function() {
                               }),
                               0
                             )
-                          : _c("tbody", [_vm._m(2)])
+                          : _c("tbody", [_vm._m(4)])
                       ])
                     ])
                   ]),
@@ -74048,7 +74199,7 @@ var render = function() {
                 _vm._v(" "),
                 _c("div", { staticClass: "card-body" }, [
                   _c("table", { staticClass: "table tablesorter" }, [
-                    _vm._m(3),
+                    _vm._m(5),
                     _vm._v(" "),
                     _c(
                       "tbody",
@@ -74165,12 +74316,14 @@ var render = function() {
                     _c("div", { staticClass: "form-group row border" }, [
                       _c("div", { staticClass: "table-responsive" }, [
                         _c("table", { staticClass: "table tablesorter" }, [
-                          _vm._m(4),
+                          _vm._m(6),
                           _vm._v(" "),
                           _c(
                             "tbody",
-                            _vm._l(_vm.arrayMateria, function(materia) {
+                            _vm._l(_vm.arrayMateria, function(materia, index) {
                               return _c("tr", { key: materia.id }, [
+                                _c("td", [_vm._v(_vm._s(index + 1))]),
+                                _vm._v(" "),
                                 _c("td", {
                                   domProps: {
                                     textContent: _vm._s(materia.nombre)
@@ -74239,14 +74392,14 @@ var render = function() {
           },
           [
             _c("div", { staticClass: "modal-content" }, [
-              _vm._m(5),
+              _vm._m(7),
               _vm._v(" "),
               _c("div", { staticClass: "modal-body" }, [
                 _c("div", { staticClass: "table-responsive" }, [
-                  _vm._m(6),
+                  _vm._m(8),
                   _vm._v(" "),
                   _c("table", { staticClass: "table tablesorter" }, [
-                    _vm._m(7),
+                    _vm._m(9),
                     _vm._v(" "),
                     _c(
                       "tbody",
@@ -74303,9 +74456,33 @@ var staticRenderFns = [
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
     return _c("label", [
+      _vm._v("Revisar "),
+      _c("span", { staticStyle: { color: "red" } }, [
+        _vm._v("(*Acceso Administracion)")
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("label", [
       _vm._v("Materias "),
       _c("span", { staticStyle: { color: "red" } }, [_vm._v("(*Seleccione)")])
     ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "button",
+      {
+        staticClass: "btn btn-primary",
+        attrs: { type: "submit", disabled: "" }
+      },
+      [_c("i", { staticClass: "fa fa-search" }), _vm._v(" Seleccione")]
+    )
   },
   function() {
     var _vm = this
@@ -74357,6 +74534,8 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c("thead", { staticClass: "text-primary" }, [
       _c("tr", [
+        _c("th", [_vm._v("Nro")]),
+        _vm._v(" "),
         _c("th", [_vm._v("Materia")]),
         _vm._v(" "),
         _c("th", [_vm._v("Area")])
@@ -74525,7 +74704,7 @@ var render = function() {
                               _vm._v(" "),
                               _c(
                                 "option",
-                                { attrs: { value: "g.codGestion" } },
+                                { attrs: { value: "g.cod_gestion" } },
                                 [_vm._v("Gestion")]
                               )
                             ]

@@ -221,23 +221,32 @@
             programarMensualidad(){
                 let me = this;
                 axios.post('/pago/mensual/programar',this.datos).then(function (response) {
-                    me.alert=1;
-                    me.datos = {
-                        id : 0,
-                        plazo_fecha: '',
-                        mes : '',
-                        monto : '',
-                        id_gestion_curso : ''
+                    if(response.data==1){
+                        alert('Error!.. este Mes ya esta programado. <<Ver Mensualidades>>');
+                    }else{
+                        me.alert=1;
+                        me.datos = {
+                            id : 0,
+                            plazo_fecha: '',
+                            mes : '',
+                            monto : '',
+                            id_gestion_curso : ''
+                        }
                     }
+                    
                 }).catch(function (error) {
                     console.log(error);
                 });
             },
             listarMensualidad(){
                 let me = this;
+                me.arrayMensualidad=[];
                 var url='/mensualidad/detalle?id_gestion_curso='+me.datos.id_gestion_curso + '&mes=' + me.datos.mes;
                 axios.get(url).then(function(response){
                     me.arrayMensualidad= response.data;
+                    if(me.arrayMensualidad.length==0){
+                        alert('Error!.. Este mes no esta programado. <<Volver>>');
+                    }
                 })
                 .catch(function(error){
                     console.log(error);

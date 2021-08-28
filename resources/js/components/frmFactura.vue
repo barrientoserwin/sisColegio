@@ -34,6 +34,15 @@
                                     </select> 
                                 </div>
                             </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Paralelo</label>
+                                    <select class="form-control" v-model="paralelo">
+                                        <option value="" disabled>Seleccione</option>
+                                        <option v-for="paralelo in arrayParalelo" :key="paralelo.id" :value="paralelo.nombre" v-text="paralelo.nombre"></option>                                        
+                                    </select> 
+                                </div>
+                            </div> 
                             <div class="col-md-8">
                                 <label>Alumno <span style="color:red;" >(*Seleccione)</span></label>
                                 <div class="input-group">                                
@@ -83,7 +92,7 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <button type="button" class="btn btn-info btn-sm" @click="facturaPdf(mensualidad.id_inscripcion,mensualidad.id_pago_mensual)">
+                                                <button type="button" class="btn btn-info btn-sm" @click="facturaPdf(mensualidad.id_inscripcion)">
                                                     <i class="tim-icons icon-single-copy-04"></i>
                                                 </button>
                                                 <template v-if="mensualidad.estado">
@@ -172,13 +181,15 @@
                     id_inscripcion : 0,
                     id_pago_mensual : 0,
                     id_gestion_curso : ''
-                },   
+                },  
+                paralelo:'', 
                 nombreAlumno : '',
                 codGestion : '',
                 arrayGestion : [],                                          
                 arrayMensualidad : [],
                 arrayAlumno : [],       
-                arrayGCurso : [],      
+                arrayGCurso : [],    
+                arrayParalelo : [],      
                 modal : 0,
                 tituloModal : '',
                 tipoAccion : 0,
@@ -272,9 +283,10 @@
             },
             listarAlumno(buscarA, criterioA){
                 let me = this;
-                var url='/inscripcion/alumnoInscripcion?buscarA=' + buscarA + '&criterioA=' + criterioA+ '&id_gestion_curso=' + me.datos.id_gestion_curso;
+                var url='/inscripcion/alumnoInscripcion2?paralelo=' + me.paralelo+ '&id_gestion_curso=' + me.datos.id_gestion_curso;
                 axios.get(url).then(function(response){
                     me.arrayAlumno= response.data;
+                    
                 })
                 .catch(function(error){
                     console.log(error);
@@ -317,6 +329,19 @@
                     console.log(error);
                 });
             },
+            selectParalelo(){
+                let me = this;
+                var url='/paralelo/selectParalelo';
+                axios.get(url).then(function(response){
+                    me.arrayParalelo= response.data;
+                })
+                .catch(function(error){
+                    console.log(error);
+                });
+            },
+            facturaPdf(id){
+                window.open('http://127.0.0.1:8000/mensualidad/pago/pdf/'+ id);
+            },
             selectCursoGestion: function() {
                 let me = this;
                 var url='/gestion/curso/selectCursoGestion?cod_gestion='+this.codGestion;
@@ -330,6 +355,7 @@
         },
         mounted() {
             this.selectGestion();
+            this.selectParalelo();
         }
     }
 </script>

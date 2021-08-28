@@ -64,7 +64,7 @@
                     <div class="card-body">
                         <div class="form-group row border">                            
                             <div class="col-md-4">
-                                <label>Gestion Academica</label>
+                                <label>Gestion Academica(Ejem: 2022)</label>
                                 <div class="form-group">                                
                                     <input type="number" class="form-control" v-model="datos.datos.cod_gestion">
                                 </div>
@@ -341,13 +341,24 @@
                 }).then((result) => {
                 if (result.value) {
                     let me = this;
+                    var respt;
                     axios.put('/gestion/activar',{'id': id}).then(function (response) {
-                        me.listarGestion();
-                        swal(
-                        'Activado!',
-                        'Esta Gestion Escolar se ha habilitado con éxito.',
-                        'success'
-                        )
+                        respt=response.data;
+                        if(respt==0){
+                            swal(
+                            'Ha ocurrido un error!',
+                            'La gestion Anterior aun esta vigente.'
+                            )
+                        }
+                        else{
+                            me.listarGestion();
+                            swal(
+                            'Activado!',
+                            'Esta Gestion Escolar se ha habilitado con éxito.',
+                            'success'
+                            )
+                        }
+                        
                     }).catch(function (error) {
                         console.log(error);
                     });                   

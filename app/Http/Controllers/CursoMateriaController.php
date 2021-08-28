@@ -60,4 +60,20 @@ class CursoMateriaController extends Controller
         ->get();        
         return $curso_materia;
     }
+
+    public function validarAsignacionMateria(Request $request){
+        $curso_materia = CursoMateria::join('materia','curso_materia.id_materia','=','materia.id')
+        ->select('curso_materia.id','materia.nombre')
+        ->where('curso_materia.id_gestion_curso', '=', $request->id_gestion_curso)
+        ->get();
+        $valor=0;
+        if(count($curso_materia)!=0){
+           $valor =1;
+        }
+        else{
+            $valor =0;
+        }
+
+        return $valor;
+    }
 }

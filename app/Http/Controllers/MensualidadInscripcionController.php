@@ -53,4 +53,26 @@ class MensualidadInscripcionController extends Controller
         $factura->id_mensualidad=$request->id_pago_mensual;
         $factura->save();
     }
+
+    public function pagoPDF(Request $request){
+        $mensualidad = MensualidadInscripcion::join('inscripcion','mensualidad_inscripcion.id_inscripcion','=','inscripcion.id')
+        ->join('pago_mensual','mensualidad_inscripcion.id_pago_mensual','=','pago_mensual.id')
+        ->select('pago_mensual.plazo_fecha','pago_mensual.mes','pago_mensual.monto','mensualidad_inscripcion.estado',
+        'mensualidad_inscripcion.fecha_pago','mensualidad_inscripcion.id_inscripcion','mensualidad_inscripcion.id_pago_mensual')
+        ->where('mensualidad_inscripcion.id_inscripcion', '=', $request->id)
+        ->get();     
+
+        $alumno = DB::table('inscripcion as i')
+        ->join('alumno as a','i.id_alumno','=','a.id')
+        ->select('a.nombre','a.apellidos')
+        ->where('i.id', '=', $request->id)
+        ->first();
+
+        $pdf = \PDF::loadView('report.factura', [
+            'alumno'=>strtoupper($alumno->nombre.' '.$alumno->apellidos),
+            'fecha_actual'=>Carbon::now()->locale('es')->translatedFormat('l d \d\e F \d\e\l Y'),
+            'mensualidad'=>$mensualidad
+        ]);
+        return $pdf->stream('extracto.pdf');
+    }
 }

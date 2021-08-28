@@ -45,7 +45,7 @@
                             </div>                              
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>Alumno</label>
+                                    <label>Alumno *(Matricula)</label>
                                     <input type="number" v-model="matricula" class="form-control">
                                 </div>
                             </div>                        

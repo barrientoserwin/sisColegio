@@ -21,7 +21,7 @@
                                         <option value="a.nombre">Alumno: nombre</option>
                                         <option value="a.matricula">Alumno: matricula</option>
                                         <option value="c.nombre">Curso</option>
-                                        <option value="g.codGestion">Gestion</option>                                        
+                                        <option value="g.cod_gestion">Gestion</option>                                        
                                     </select>
                                     <input type="text" v-model="buscar" @keyup.enter="listarInscripcion(1, buscar, criterio)" class="form-control" placeholder="Texto a buscar">
                                     <button type="submit" @click="listarInscripcion(1, buscar, criterio)" class="btn btn-primary"><i class="fa fa-search"></i> Buscar</button>

@@ -51,12 +51,21 @@ class GestionController extends Controller
     public function desactivar(Request $request){    
         $gestion= Gestion::findOrFail($request->id);
         $gestion->estado=0;
-        $gestion->save();
+        $gestion->save();      
     }
 
     public function activar(Request $request){    
-        $gestion= Gestion::findOrFail($request->id);
-        $gestion->estado=1;
-        $gestion->save();
+        $obj = Gestion::select('estado')->where('gestion.id',($request->id)-1)->first();
+        $estado=1;
+        if($obj->estado==1){
+            $estado=0;
+        }
+        else{
+            $gestion= Gestion::findOrFail($request->id);
+            $gestion->estado=1;
+            $gestion->save();
+            $estado=1;
+        } 
+        return $estado;
     }
 }

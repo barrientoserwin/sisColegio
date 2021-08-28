@@ -112,6 +112,7 @@ Route::group(['middleware'=>['auth']],function(){
     Route::put('/inscripcion/desactivar',[InscripcionController::class, 'desactivar']);
     Route::put('/inscripcion/activar',[InscripcionController::class, 'activar']);
     Route::get('/inscripcion/alumnoInscripcion', [InscripcionController::class, 'alumnoInscripcion']);
+    Route::get('/inscripcion/alumnoInscripcion2', [InscripcionController::class, 'alumnoInscripcion2']);
 
     //Rutas Pago Mensual
     Route::post('/pago/mensual/programar', [PagoMensualController::class, 'programarPago']);
@@ -120,6 +121,7 @@ Route::group(['middleware'=>['auth']],function(){
     Route::get('/mensualidad/detalle', [MensualidadInscripcionController::class, 'detalleMensualidad']);
     Route::get('/mensualidad/detalleCliente', [MensualidadInscripcionController::class, 'detalleCliente']);
     Route::put('/mensualidad/pagoMes', [MensualidadInscripcionController::class, 'pagoMes']);
+    Route::get('/mensualidad/pago/pdf/{id}',[MensualidadInscripcionController::class, 'pagoPDF']);
 
     //Rutas Curso Materia
     Route::post('/curso/materia/guardar', [CursoMateriaController::class, 'guardar']);
@@ -127,6 +129,7 @@ Route::group(['middleware'=>['auth']],function(){
     Route::get('/curso/materia/listarCursoMateria', [CursoMateriaController::class, 'listarCursoMateria']);
     Route::put('/curso/materia/asignarProfesor', [CursoMateriaController::class, 'asignarProfesor']);
     Route::get('/curso/materia/selectCursoMateria', [CursoMateriaController::class, 'selectCursoMateria']);
+    Route::get('/curso/materia/validar', [CursoMateriaController::class, 'validarAsignacionMateria']);
 
     //Rutas Curso Paralelo
     Route::post('/curso/paralelo/guardar', [CursoParaleloController::class, 'guardar']);

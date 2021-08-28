@@ -40,7 +40,7 @@ class InscripcionController extends Controller
         return $inscripcion;
     }
 
-    private function findPeriodo($id_curso_paralelo){
+    public function findPeriodo($id_curso_paralelo){
         $periodo = DB::table('curso_paralelo as cp')
         ->join('paralelo as p','cp.id_paralelo','=','p.id')
         ->select('p.nombre')
@@ -57,6 +57,17 @@ class InscripcionController extends Controller
         ->select('alumno.id','alumno.nombre','alumno.apellidos','alumno.matricula')
         ->where('inscripcion_gestion.id_gestion_curso','=',$id_gestion_curso)
         ->where('inscripcion_gestion.paralelo','=',$paralelo)
+        ->get();
+
+        return $alumno;
+    }
+
+    public function alumnoInscripcion2(Request $request){
+        $alumno= Inscripcion::join('alumno','inscripcion.id_alumno','=','alumno.id')
+        ->join('inscripcion_gestion','inscripcion.id','=','inscripcion_gestion.id_inscripcion')
+        ->select('inscripcion.id as id_inscripcion','alumno.id','alumno.nombre','alumno.apellidos','alumno.matricula','alumno.dni')
+        ->where('inscripcion_gestion.id_gestion_curso','=',$request->id_gestion_curso)
+        ->where('inscripcion_gestion.paralelo','=',$request->paralelo)
         ->get();
 
         return $alumno;

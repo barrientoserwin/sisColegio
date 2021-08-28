@@ -35,9 +35,20 @@
                                 </div>
                             </div>                            
                             <div class="col-md-4">
-                                <label>Materias <span style="color:red;" >(*Seleccione)</span></label>
+                                <label>Revisar <span style="color:red;" >(*Acceso Administracion)</span></label>
                                 <div class="form-group">      
-                                    <button type="submit" @click="listarMateria()" data-toggle="modal" data-target="#modalMateria" class="btn btn-primary"><i class="fa fa-search"></i> Seleccione</button>
+                                    <button type="submit" @click="verificarInstancia()" class="btn btn-primary">Verificar</button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label>Materias <span style="color:red;" >(*Seleccione)</span></label>
+                                <div class="form-group">   
+                                    <template v-if="validar==0">
+                                        <button type="submit" class="btn btn-primary" disabled><i class="fa fa-search"></i> Seleccione</button>
+                                    </template>   
+                                    <template v-else>
+                                        <button type="submit" @click="listarMateria()" data-toggle="modal" data-target="#modalMateria" class="btn btn-primary"><i class="fa fa-search"></i> Seleccione</button>
+                                    </template>
                                 </div>
                             </div>
                             <div class="col-md-12">
@@ -146,12 +157,14 @@
                                 <table class="table tablesorter">
                                     <thead class="text-primary">
                                         <tr>
+                                            <th>Nro</th>
                                             <th>Materia</th>
                                             <th>Area</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr v-for="materia in arrayMateria" :key="materia.id">
+                                        <tr v-for="(materia,index) in arrayMateria" :key="materia.id">
+                                            <td>{{index+1}}</td>
                                             <td v-text="materia.nombre"></td>
                                             <td v-text="materia.area"></td>
                                         </tr>
@@ -235,7 +248,8 @@
                 arrayMateria : [],
                 errorGestionCurso : 0,
                 errorMostrarMsjGestionCurso : [],
-                listado: 0
+                listado: 0,
+                validar:0,
             }
         },
         methods : {
@@ -256,6 +270,7 @@
                 me.arrayDetalle = [];
                 me.errorMostrarMsjGestionCurso=[];
                 me.codGestion = '';
+                me.validar=0;
             },
             volverListadoCero(){
                 this.listado=0;
@@ -267,6 +282,7 @@
             },
             detalleGestionCurso(data=[]){
                 this.listado=2;
+                this.arrayMateria=[];
                 this.codGestion = data['cod_gestion'];
                 this.curso = data['curso'];
                 this.listarCursoMateria(data['id']);
@@ -279,6 +295,21 @@
                 })
                 .catch(function(error){
                     console.log(error);
+                });
+            },
+            verificarInstancia(){
+                let me=this;
+                var url='/curso/materia/validar?id_gestion_curso='+me.datos.id_gestion_curso;
+                axios.get(url).then(function(response){
+                    if(response.data==1){
+                        alert("Error... Ya se encuentran Administradas! - <<Dirigase a Ver Detalles>>");
+                    }
+                    else{
+                        me.validar=1;
+                    }
+                })
+                .catch(function(error){
+                    console.log(error)
                 });
             },
             listarMateria(){
